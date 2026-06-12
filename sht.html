@@ -3,9 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Weekly Goal Tracker</title>
+    <link rel="stylesheet" href="sht.css">
 </head>
 <body>
+
+    <div class="container">
+
+        <h1>Task Tracker</h1>
+
+        <div class="day-section">
+
+            <select id="daySelect">
+                <option value ="Monday">Monday</option>
+                <option  value = "Tuesday">Tuesday</option>
+                <option value = "wdnesday">Wednesday</option>
+                <option value = "Thursday">Thursday</option>
+                <option value = "Friday">Friday</option>
+                <option value = "Saturday">Saturday</option>
+                <option value = "Sunday">Sunday</option>                
+            </select>
+
+            <input type="text" id="goalInput" placeholder="Enter your goal">
+
+            <button id="addGoal">Add Goal</button>
+
+        <div>
+            <div class="taskcontainer">
+                <ul id="goalList"></ul>
+            </div>
+            <div class="progress-container">
+            <div id="progressBar"></div>
+        </div>
+
+        <h3 id="percentage">0% Completed</h3>
+        <div class="quote-box">
+              <p id="quote">Believe in yourself and all that you are.</p>
+        
+        </div>
+
+    </div>
     
+
+    <script src="sht.js"></script>
+
 </body>
 </html>
