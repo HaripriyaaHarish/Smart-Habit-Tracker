@@ -7,8 +7,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const progressBar = document.getElementById("progressBar");
     const percentage = document.getElementById("percentage");
 
+    const selectedDay =
+        localStorage.getItem("selectedDay") || "Monday";
+
+    daySelect.value = selectedDay;
+
     addGoal.addEventListener("click", addTask);
 
+    daySelect.addEventListener("change", () => {
+
+        localStorage.setItem(
+            "selectedDay",
+            daySelect.value
+        );
+
+        loadTasks();
+    });
 
     loadTasks();
 
@@ -21,26 +35,26 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Please enter a goal");
             return;
         }
-        if (day === selectedDay) {
-            addTaskToDOM(goalText, day, false);
-        }
+
+        const tasks =
+            JSON.parse(
+                localStorage.getItem("weeklyTasks")
+            ) || [];
+
+        tasks.push({
+            text: `${day} : ${goalText}`,
+            completed: false
+        });
+
+        localStorage.setItem(
+            "weeklyTasks",
+            JSON.stringify(tasks)
+        );
+
         goalInput.value = "";
 
-        saveTasks();
-        updateProgress();
+        loadTasks();
     }
-
-    daySelect.addEventListener("change", () => {
-        
-        localStorage.setItem("selectedDay", daySelect.value)
-
-
-        const selectedDay =
-            localStorage.getItem("selectedDay") || "Monday";
-console.log(selectedDay)
-        daySelect.value = selectedDay
-    })
-
 
     function addTaskToDOM(goalText, day, completed = false) {
 
@@ -53,7 +67,6 @@ console.log(selectedDay)
         checkbox.type = "checkbox";
         checkbox.classList.add("custom-checkbox");
         checkbox.checked = completed;
-
 
         const taskText = document.createElement("span");
         taskText.innerText = `${day} : ${goalText}`;
@@ -73,13 +86,12 @@ console.log(selectedDay)
                 taskText.style.color = "black";
             }
 
-            updateProgress();
             saveTasks();
+            updateProgress();
         });
 
         leftDiv.appendChild(checkbox);
         leftDiv.appendChild(taskText);
-
 
         const editBtn = document.createElement("button");
         editBtn.innerText = "Edit";
@@ -89,29 +101,39 @@ console.log(selectedDay)
 
             if (editBtn.innerText === "Edit") {
 
-                const inputBox = document.createElement("input");
+                const inputBox =
+                    document.createElement("input");
+
                 inputBox.type = "text";
                 inputBox.value = taskText.innerText;
 
-                leftDiv.replaceChild(inputBox, taskText);
+                leftDiv.replaceChild(
+                    inputBox,
+                    taskText
+                );
 
                 editBtn.innerText = "Save";
 
             } else {
 
                 const inputBox =
-                    leftDiv.querySelector("input[type='text']");
+                    leftDiv.querySelector(
+                        "input[type='text']"
+                    );
 
-                taskText.innerText = inputBox.value;
+                taskText.innerText =
+                    inputBox.value;
 
-                leftDiv.replaceChild(taskText, inputBox);
+                leftDiv.replaceChild(
+                    taskText,
+                    inputBox
+                );
 
                 editBtn.innerText = "Edit";
 
                 saveTasks();
             }
         });
-
 
         const deleteBtn = document.createElement("button");
         deleteBtn.innerText = "X";
@@ -121,11 +143,12 @@ console.log(selectedDay)
 
             li.remove();
 
-            updateProgress();
             saveTasks();
+            updateProgress();
         });
 
-        const buttonGroup = document.createElement("div");
+        const buttonGroup =
+            document.createElement("div");
 
         buttonGroup.appendChild(editBtn);
         buttonGroup.appendChild(deleteBtn);
@@ -139,7 +162,9 @@ console.log(selectedDay)
     function updateProgress() {
 
         const totalTasks =
-            document.querySelectorAll("#goalList li").length;
+            document.querySelectorAll(
+                "#goalList li"
+            ).length;
 
         const completedTasks =
             document.querySelectorAll(
@@ -154,10 +179,12 @@ console.log(selectedDay)
             );
         }
 
-        progressBar.style.width = progress + "%";
-        percentage.innerText = progress + "% Completed";
-    }
+        progressBar.style.width =
+            progress + "%";
 
+        percentage.innerText =
+            progress + "% Completed";
+    }
 
     function saveTasks() {
 
@@ -165,53 +192,82 @@ console.log(selectedDay)
 
         document.querySelectorAll("#goalList li").forEach(li => {
 
-            const checkbox =
-                li.querySelector("input[type='checkbox']");
+                const checkbox =
+                    li.querySelector("input[type='checkbox']");
 
-            const text =
+                const text =
                 li.querySelector("span");
 
-            if (text) {
+                if (text) {
 
-                tasks.push({
-                    text: text.innerText,
-                    completed: checkbox.checked
-                });
-            }
-        });
+                    tasks.push({
+                        text: text.innerText,
+                        completed: checkbox.checked
+                    });
+                }
+            });
 
-        localStorage.setItem(
-            "weeklyTasks",
-            JSON.stringify(tasks)
-        );
-    }
-
-
-    function loadTasks() {
-
-        const savedTasks =
+        const allTasks =
             JSON.parse(
                 localStorage.getItem("weeklyTasks")
             ) || [];
 
+        const currentDay = daySelect.value;
+
+        const otherDayTasks =
+            allTasks.filter(task => {
+                return !task.text.startsWith(
+                    currentDay + " : "
+                );
+            });
+
+        localStorage.setItem(
+            "weeklyTasks",
+            JSON.stringify([
+                ...otherDayTasks,
+                ...tasks
+            ])
+        );
+    }
+
+    function loadTasks() {
+
+        goalList.innerHTML = "";
+
+        const selectedDay =
+            localStorage.getItem(
+                "selectedDay"
+            ) || "Monday";
+
+        const savedTasks =
+            JSON.parse(
+                localStorage.getItem(
+                    "weeklyTasks"
+                )
+            ) || [];
+
         savedTasks.forEach(task => {
 
-            const parts = task.text.split(" : ");
+            const parts =
+                task.text.split(" : ");
 
             const day = parts[0];
+
             const goal =
                 parts.slice(1).join(" : ");
 
-            addTaskToDOM(
-                goal,
-                day,
-                task.completed
-            );
+            if (day === selectedDay) {
+
+                addTaskToDOM(
+                    goal,
+                    day,
+                    task.completed
+                );
+            }
         });
 
         updateProgress();
     }
-
 
     const quotes = [
         "Believe in yourself and all that you are.",
@@ -244,5 +300,4 @@ console.log(selectedDay)
     }
 
     setInterval(changeQuote, 3000);
-
 });
